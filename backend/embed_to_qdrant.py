@@ -96,7 +96,20 @@ def embed_batch(texts, retries=6):
 t0 = time.time()
 done = 0
 
-for i in range(0, len(rows), BATCH_SIZE):
+# Resume: skip rows already embedded (point ids are sequential 0..N-1)
+START_FROM = int(os.environ.get("START_FROM", "0"))
+if START_FROM <= 0:
+    try:
+        existing_pts = qdrant.get_collection(COLLECTION).points_count or 0
+        # rewind to batch boundary to be safe
+        START_FROM = (existing_pts // BATCH_SIZE) * BATCH_SIZE
+    except Exception:
+        START_FROM = 0
+if START_FROM > 0:
+    print(f"Resuming from row {START_FROM:,} (skipping already-embedded)")
+    done = START_FROM
+
+for i in range(START_FROM, len(rows), BATCH_SIZE):
     batch = rows[i:i+BATCH_SIZE]
     texts, metas = [], []
     for lang, vol, pg, items, content in batch:
