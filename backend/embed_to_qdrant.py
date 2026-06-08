@@ -78,9 +78,20 @@ conn.close()
 print(f"Loaded {len(rows):,} rows  (model: {EMBED_MODEL}, max_chars: {MAX_CHARS})")
 
 # ── Embed + upsert in batches ────────────────────────────────────────────────
-def embed_batch(texts):
-    resp = oai.embeddings.create(model=EMBED_MODEL, input=texts)
-    return [r.embedding for r in resp.data]
+def embed_batch(texts, retries=6):
+    for attempt in range(retries):
+        try:
+            resp = oai.embeddings.create(model=EMBED_MODEL, input=texts)
+            return [r.embedding for r in resp.data]
+        except Exception as ex:
+            msg = str(ex)
+            if "rate_limit" in msg or "429" in msg:
+                wait = 2 ** attempt   # 1,2,4,8,16,32s
+                print(f"\n  rate limit, waiting {wait}s...", end="", flush=True)
+                time.sleep(wait)
+                continue
+            raise
+    raise RuntimeError("embed failed after retries")
 
 t0 = time.time()
 done = 0
@@ -118,6 +129,7 @@ for i in range(0, len(rows), BATCH_SIZE):
 
     qdrant.upsert(collection_name=COLLECTION, points=points)
     done += len(batch)
+    time.sleep(0.4)   # throttle to stay under 1M TPM
 
     el = time.time() - t0
     rate = done / el if el else 0
