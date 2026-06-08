@@ -19,7 +19,10 @@ import os, sys, sqlite3, time
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 QDRANT_URL     = os.environ.get("QDRANT_URL", "http://172.16.1.7:6333")
 QDRANT_API_KEY = os.environ.get("QDRANT_API_KEY", "")
-LANG_FILTER    = os.environ.get("LANG", "")
+LANG_FILTER    = os.environ.get("TIPITAKA_LANG", "")
+# guard against system $LANG collision (e.g. en_US.UTF-8)
+if LANG_FILTER not in ("thai", "pali", "thaimm", "thaimc"):
+    LANG_FILTER = ""
 BATCH_SIZE     = int(os.environ.get("BATCH_SIZE", "100"))
 MAX_CHARS      = int(os.environ.get("MAX_CHARS", "1500"))
 DATA_DB        = os.environ.get("DATA_DB", "/docker/pocketbase/data/data.db")
