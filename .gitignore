@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+frontend/dist/
+backend/pb_public/
+
+# PocketBase binary & data
+backend/pocketbase
+backend/pb_data/
+
+# Database files (build on VPS instead)
+backend/tipitaka_dbs/
+*.db
+*.bz2
+
+# Env
+.env.local
+frontend/.env.local
+
+# OS
+.DS_Store
+__pycache__/
+*.pyc

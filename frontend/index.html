@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>E-Tipitaka</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <script>
+      (function(){
+        var t=localStorage.getItem('theme')||'light';
+        if(t==='dark') document.documentElement.classList.add('dark');
+        var f=localStorage.getItem('fontSize')||'md';
+        var m={sm:'14px',md:'16px',lg:'19px',xl:'22px'};
+        document.documentElement.style.setProperty('--content-font',m[f]||'16px');
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

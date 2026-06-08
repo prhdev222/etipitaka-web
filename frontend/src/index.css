@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --content-font: 16px;
+}
+
+body {
+  font-family: "Sarabun", sans-serif;
+}
+
+.content-text {
+  font-size: var(--content-font);
+  line-height: 2;
+}
+
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+.animate-slide-up {
+  animation: slide-up 0.25s ease-out;
+}
