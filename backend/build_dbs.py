@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 """Build tipitaka SQLite databases from D-Tipitaka SQL dumps."""
-import sqlite3, subprocess, os, sys
+import sqlite3, bz2, os
 
 SRC = "/tmp/D-tipitaka/1.2"
 DST = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tipitaka_dbs")
 os.makedirs(DST, exist_ok=True)
 
-def build(bz2, dst_lang):
+def build(bz2_file, dst_lang):
     out = f"{DST}/{dst_lang}.db"
     if os.path.exists(out):
         print(f"  {dst_lang}.db already exists, skip")
         return
     print(f"  Building {dst_lang}.db ...", end=" ", flush=True)
-    sql = subprocess.check_output(["bunzip2", "-c", f"{SRC}/{bz2}"]).decode("utf-8", "replace")
+    with bz2.open(f"{SRC}/{bz2_file}", "rb") as f:
+        sql = f.read().decode("utf-8", "replace")
     src = sqlite3.connect(":memory:")
     src.executescript(sql)
     dst = sqlite3.connect(out)
