@@ -54,7 +54,18 @@ except ImportError:
     from qdrant_client.models import Distance, VectorParams, PointStruct
 
 oai    = OpenAI(api_key=OPENAI_API_KEY)
-qdrant = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY or None)
+qdrant = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY or None, timeout=120)
+
+def upsert_retry(points, retries=6):
+    for attempt in range(retries):
+        try:
+            qdrant.upsert(collection_name=COLLECTION, points=points)
+            return
+        except Exception as ex:
+            wait = 2 ** attempt
+            print(f"\n  qdrant error ({str(ex)[:50]}), retry in {wait}s...", flush=True)
+            time.sleep(wait)
+    raise RuntimeError("qdrant upsert failed after retries")
 
 # ── Create collection ────────────────────────────────────────────────────────
 existing = [c.name for c in qdrant.get_collections().collections]
@@ -140,14 +151,14 @@ for i in range(START_FROM, len(rows), BATCH_SIZE):
             }
         ))
 
-    qdrant.upsert(collection_name=COLLECTION, points=points)
+    upsert_retry(points)
     done += len(batch)
     time.sleep(0.4)   # throttle to stay under 1M TPM
 
     el = time.time() - t0
     rate = done / el if el else 0
     eta = (len(rows) - done) / rate / 60 if rate else 0
-    print(f"  {done:,}/{len(rows):,}  {rate:.0f}/s  ETA {eta:.1f}min", end="\r")
+    print(f"  {done:,}/{len(rows):,}  {rate:.0f}/s  ETA {eta:.1f}min", flush=True)
 
 print(f"\nDone! {done:,} rows in {(time.time()-t0)/60:.1f} min")
 print(f"Collection '{COLLECTION}': {qdrant.get_collection(COLLECTION).points_count:,} points")
