@@ -4,7 +4,8 @@
 import os, sys, sqlite3, secrets, time
 
 BACKEND = os.path.dirname(os.path.abspath(__file__))
-PB_DATA = os.path.join(BACKEND, "pb_data")
+# Allow override via env: PB_DATA=/docker/pocketbase/data python3 import_tipitaka.py
+PB_DATA = os.environ.get("PB_DATA", os.path.join(BACKEND, "pb_data"))
 DATA_DB = os.path.join(PB_DATA, "data.db")
 SRC_DIR = os.path.join(BACKEND, "tipitaka_dbs")
 
