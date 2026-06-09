@@ -38,8 +38,12 @@ def fetch_pb(path):
 try:
     data = fetch_pb("/api/collections/ra_meetings/records?perPage=500&sort=-created")
 except urllib.error.HTTPError as e:
-    print(f"ra_meetings: HTTP {e.code} — check PB_URL/PB_TOKEN")
-    raise SystemExit(1)
+    # graceful skip — อย่าให้ source เดียวพังทำทั้ง pipeline ล้ม
+    print(f"ra_meetings: HTTP {e.code} — skipped (check PB_TOKEN if you want research notes)")
+    raise SystemExit(0)
+except Exception as e:
+    print(f"ra_meetings: {e} — skipped")
+    raise SystemExit(0)
 
 records = data.get("items", [])
 print(f"PocketBase ra_meetings: {len(records)} records")
